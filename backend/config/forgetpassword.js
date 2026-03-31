@@ -1,6 +1,19 @@
 const nodemailer = require("nodemailer");
 
-const forgetpassword = async ( email,resetLink ) => {
+const forgetpassword = async (email, resetLink) => {
+  console.log(
+    "[ForgetPassword] Starting forgetpassword function for email:",
+    email,
+  );
+  console.log(
+    "[ForgetPassword] EMAIL_USER env variable:",
+    process.env.EMAIL_USER ? "✓ Set" : "✗ NOT SET",
+  );
+  console.log(
+    "[ForgetPassword] EMAIL_PASS env variable:",
+    process.env.EMAIL_PASS ? "✓ Set" : "✗ NOT SET",
+  );
+
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -8,6 +21,8 @@ const forgetpassword = async ( email,resetLink ) => {
       pass: process.env.EMAIL_PASS,
     },
   });
+
+  console.log("[ForgetPassword] Transporter created");
 
   let mailOptions = {
     from: process.env.EMAIL_USER,
@@ -127,12 +142,16 @@ const forgetpassword = async ( email,resetLink ) => {
   };
 
   // Send email
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log("Error sending email:", error);
-    } else {
-      console.log("Email sent:", info.response);
-    }
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending password reset email:", error);
+        reject(error);
+      } else {
+        console.log("Password reset email sent:", info.response);
+        resolve(info);
+      }
+    });
   });
 };
 

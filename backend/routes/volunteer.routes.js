@@ -43,10 +43,22 @@ router.post("/register", async (req, res) => {
           },
         ],
       });
-      await SendPassword(name, email, defaultPassword, eventExists.title);
+      console.log(
+        "[Volunteer Register] New volunteer created, sending password email...",
+      );
+      try {
+        await SendPassword(name, email, defaultPassword, eventExists.title);
+        console.log("[Volunteer Register] Password email sent successfully");
+      } catch (emailError) {
+        console.error(
+          "[Volunteer Register] Error sending password email:",
+          emailError,
+        );
+        // Don't fail the entire registration if email fails
+      }
     } else {
       const isAlreadyRegistered = volunteerProfile.events.some(
-        (ev) => ev.event.toString() === eventId
+        (ev) => ev.event.toString() === eventId,
       );
 
       if (isAlreadyRegistered) {
@@ -129,7 +141,7 @@ router.post("/edittask", async (req, res) => {
     if (phone) volunteer.phone = phone;
 
     const eventIndex = volunteer.events.findIndex(
-      (event) => event.event.toString() === eventId
+      (event) => event.event.toString() === eventId,
     );
 
     if (eventIndex === -1) {
@@ -167,7 +179,7 @@ router.delete("/delete/:volunteerId/:eventId", async (req, res) => {
 
     // ✅ Correctly remove the event from volunteer.events
     volunteer.events = volunteer.events.filter(
-      (ev) => ev.event.toString() !== eventId
+      (ev) => ev.event.toString() !== eventId,
     );
 
     if (volunteer.events.length === 0) {
@@ -180,7 +192,7 @@ router.delete("/delete/:volunteerId/:eventId", async (req, res) => {
     const event = await Event.findById(eventId);
     if (event) {
       event.volunteers = event.volunteers.filter(
-        (vId) => vId.toString() !== volunteerId.toString()
+        (vId) => vId.toString() !== volunteerId.toString(),
       );
 
       await event.save();

@@ -9,8 +9,18 @@ const sendTicketEmail = async (
   date,
   venue,
   startTime,
-  endTime
+  endTime,
 ) => {
+  console.log("[EmailService] Starting sendTicketEmail function");
+  console.log(
+    "[EmailService] EMAIL_USER env variable:",
+    process.env.EMAIL_USER ? "✓ Set" : "✗ NOT SET",
+  );
+  console.log(
+    "[EmailService] EMAIL_PASS env variable:",
+    process.env.EMAIL_PASS ? "✓ Set" : "✗ NOT SET",
+  );
+
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -18,6 +28,8 @@ const sendTicketEmail = async (
       pass: process.env.EMAIL_PASS,
     },
   });
+
+  console.log("[EmailService] Transporter created");
   const formatDate = (rawDate) => {
     const date = new Date(rawDate);
     return date.toLocaleDateString("en-US", {
@@ -45,12 +57,11 @@ const sendTicketEmail = async (
     return `${formattedStart} - ${formattedEnd}`;
   };
 
-  const eventDate = formatDate(
-    "Mon Feb 17 2025 00:00:00 GMT+0530 (India Standard Time)"
-  );
-  const eventTime = formatTimeRange(
-    "2025-02-13T19:57:02.848Z - 2025-02-13T20:57:02.848Z"
-  );
+  const eventDate = date ? formatDate(date) : "Date TBD";
+  const eventTime =
+    startTime && endTime
+      ? formatTimeRange(`${startTime} - ${endTime}`)
+      : "Time TBD";
 
   let mailOptions = {
     from: process.env.EMAIL_USER,
@@ -270,23 +281,28 @@ const sendTicketEmail = async (
 
 `,
 
-   
-    attachments: [
-      {
-        filename: "ticket_qr.png",
-        path: qrCodePath, 
-        cid: "qrCode",
-        contentType: "image/png",
-      },
-    ],
+    attachments: qrCodePath
+      ? [
+          {
+            filename: "ticket_qr.png",
+            path: qrCodePath,
+            cid: "qrCode",
+            contentType: "image/png",
+          },
+        ]
+      : [],
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log("Error sending email:", error);
-    } else {
-      console.log("Email sent:", info.response);
-    }
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending ticket email:", error);
+        reject(error);
+      } else {
+        console.log("Ticket email sent:", info.response);
+        resolve(info);
+      }
+    });
   });
 };
 
