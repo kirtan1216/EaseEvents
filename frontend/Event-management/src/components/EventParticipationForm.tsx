@@ -40,8 +40,8 @@ const EventParticipationForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const toast = useRef<Toast>(null);
   const [showAskPopup, setShowAskPopup] = useState(false);
-const [questionText, setQuestionText] = useState("");
-const [answerText] = useState(""); 
+  const [questionText, setQuestionText] = useState("");
+  const [answerText] = useState("");
 
   const [countdown, setCountdown] = useState<Countdown>({
     days: 0,
@@ -96,7 +96,7 @@ const [answerText] = useState("");
   const showToast = (
     severity: "success" | "error",
     summary: string,
-    detail: string
+    detail: string,
   ) => {
     if (toast.current) {
       toast.current.show({
@@ -120,7 +120,7 @@ const [answerText] = useState("");
       showToast(
         "error",
         "Validation Error",
-        "Please enter a valid email address."
+        "Please enter a valid email address.",
       );
       return;
     }
@@ -147,7 +147,7 @@ const [answerText] = useState("");
       showToast(
         "error",
         "Validation Error",
-        "Please enter a valid email address."
+        "Please enter a valid email address.",
       );
       return;
     }
@@ -163,7 +163,7 @@ const [answerText] = useState("");
       showToast(
         "success",
         "Success",
-        "Registration successful! Check your email for confirmation."
+        "Registration successful! Check your email for confirmation.",
       );
       refetch();
     } catch (error: any) {
@@ -193,19 +193,22 @@ const [answerText] = useState("");
         phone,
         eventId,
       });
+      console.log(orderResponse.data);
       const {
         id: order_id,
         amount: order_amount,
         currency,
       } = orderResponse.data;
       const options = {
-        key: "rzp_test_3DBjtYNoUa8u7a",
+        key: "rzp_test_SWAIXprgqfN3mF",
+
         amount: order_amount,
         currency,
         name: "Event Registration",
         description: "Ticket Payment",
         order_id,
         handler: async function (response: any) {
+          // console.log(order_amount);
           try {
             const verifyResponse = await axios.post(
               `${api}/payment/verify-payment`,
@@ -213,13 +216,13 @@ const [answerText] = useState("");
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_signature: response.razorpay_signature,
-              }
+              },
             );
             if (verifyResponse.data.success) {
               showToast(
                 "success",
                 "Success",
-                "Payment successful! Check your email for the ticket."
+                "Payment successful! Check your email for the ticket.",
               );
               refetch();
             } else {
@@ -230,7 +233,7 @@ const [answerText] = useState("");
             showToast(
               "error",
               "error",
-              "Payment verification error. Please contact support."
+              "Payment verification error. Please contact support.",
             );
             // alert("Payment verification error. Please contact support.");
           }
@@ -269,61 +272,71 @@ const [answerText] = useState("");
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       <Toast ref={toast} />
-{/* Ask Question Floating Button */}
-<div className="fixed bottom-6 right-6 z-50">
-  <button
-    onClick={() => setShowAskPopup(!showAskPopup)}
-    className="bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700"
-  >
-    Ask
-  </button>
-</div>
+      {/* Ask Question Floating Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => setShowAskPopup(!showAskPopup)}
+          className="bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700"
+        >
+          Ask
+        </button>
+      </div>
 
-{/* Popup Form */}
-{showAskPopup && (
-  <div className="fixed bottom-20 right-6 bg-white shadow-xl p-4 rounded-lg z-50 w-80">
-    <h3 className="text-lg font-semibold mb-2 text-gray-800">Ask a Question</h3>
-    <InputText
-      value={questionText}
-      onChange={(e) => setQuestionText(e.target.value)}
-      placeholder="Type your question here..."
-      className="w-full mb-2"
-    />
-    <div className="flex justify-end space-x-2">
-      <button
-        onClick={() => setShowAskPopup(false)}
-        className="text-gray-600 hover:text-gray-800 text-sm"
-      >
-        Cancel
-      </button>
-      <button
-        onClick={async () => {
-          try {
-            if (!questionText.trim()) {
-              showToast("error", "Error", "Question cannot be empty.");
-              return;
-            }
-            const response = await axios.post(`${api}/event/sendquestion`, {
-              qu: questionText,
-              ans: answerText,
-              eventid: eventId,
-            });
-            showToast("success", "Success", response.data.message);
-            setQuestionText("");
-            setShowAskPopup(false);
-            refetch(); // Optional, if you want to refresh event data
-          } catch (error: any) {
-            console.error("Ask Question Error:", error);
-            showToast("error", "Failed", error.response?.data?.message || "Failed to submit question");
-          }
-        }}
-        className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded"
-      >
-        Submit
-      </button>
-    </div>
-  </div>
-)}
+      {/* Popup Form */}
+      {showAskPopup && (
+        <div className="fixed bottom-20 right-6 bg-white shadow-xl p-4 rounded-lg z-50 w-80">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800">
+            Ask a Question
+          </h3>
+          <InputText
+            value={questionText}
+            onChange={(e) => setQuestionText(e.target.value)}
+            placeholder="Type your question here..."
+            className="w-full mb-2"
+          />
+          <div className="flex justify-end space-x-2">
+            <button
+              onClick={() => setShowAskPopup(false)}
+              className="text-gray-600 hover:text-gray-800 text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  if (!questionText.trim()) {
+                    showToast("error", "Error", "Question cannot be empty.");
+                    return;
+                  }
+                  const response = await axios.post(
+                    `${api}/event/sendquestion`,
+                    {
+                      qu: questionText,
+                      ans: answerText,
+                      eventid: eventId,
+                    },
+                  );
+                  showToast("success", "Success", response.data.message);
+                  setQuestionText("");
+                  setShowAskPopup(false);
+                  refetch(); // Optional, if you want to refresh event data
+                } catch (error: any) {
+                  console.error("Ask Question Error:", error);
+                  showToast(
+                    "error",
+                    "Failed",
+                    error.response?.data?.message ||
+                      "Failed to submit question",
+                  );
+                }
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      )}
 
       <div
         style={{

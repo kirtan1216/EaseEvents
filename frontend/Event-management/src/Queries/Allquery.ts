@@ -2,9 +2,9 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-// export const api = "http://localhost:8000";
+export const api = "http://localhost:8000";
 
-export const api = "https://easeevents.onrender.com";
+// export const api = "https://easeevents.onrender.com";
 
 const createEvent = async (formdata: any) => {
   const res = await axios.post(`${api}/event/create_event`, formdata);
@@ -13,7 +13,7 @@ const createEvent = async (formdata: any) => {
 const EditParticipant = async (formdata: any) => {
   const res = await axios.post(
     `${api}/participant/edit/${formdata._id}`,
-    formdata
+    formdata,
   );
   return res.data;
 };
@@ -21,12 +21,12 @@ const EditParticipant = async (formdata: any) => {
 const EditOrganizer = async (formdata: any) => {
   const res = await axios.put(
     `${api}/user/profile/${formdata.userID}`,
-    formdata
+    formdata,
   );
   return res.data;
 };
 
-const GetAiMessage = async ({  eventDetails }: any) => {
+const GetAiMessage = async ({ eventDetails }: any) => {
   const res = await axios.post(`${api}/ai/generate-event-content`, {
     eventDetails,
   });
@@ -37,8 +37,20 @@ const DeleteParticipant = async (userids: any) => {
   return res.data;
 };
 
-const SendPassWord = async ({ans,id,eventid}:{ans:string, id:string,eventid:string})=>{
-  const res = await axios.post(`${api}/event/sendquestion`,{ans,id,eventid});
+const SendPassWord = async ({
+  ans,
+  id,
+  eventid,
+}: {
+  ans: string;
+  id: string;
+  eventid: string;
+}) => {
+  const res = await axios.post(`${api}/event/sendquestion`, {
+    ans,
+    id,
+    eventid,
+  });
   return res.data;
 };
 
@@ -47,10 +59,12 @@ const FetchEvent = async () => {
   return response.data;
 };
 
-const FetchAnalytics = async (userID:string) =>{  
-  const res = await axios.get(`${api}/anal/dashboard-analytics?userid=${userID}`)
+const FetchAnalytics = async (userID: string) => {
+  const res = await axios.get(
+    `${api}/anal/dashboard-analytics?userid=${userID}`,
+  );
   return res.data;
-}
+};
 
 const FetchOGDetail = async (userID: string) => {
   const response = await axios.get(`${api}/user/profileDetails/${userID}`);
@@ -67,10 +81,10 @@ const fetchVolunteerdetail = async (VolID: string) => {
   return response.data;
 };
 
-const forgetpassword =async(email:string)=>{
-  const res = await axios.post(`${api}/user/forgetpassword`,{email});
+const forgetpassword = async (email: string) => {
+  const res = await axios.post(`${api}/user/forgetpassword`, { email });
   return res;
-}
+};
 
 const FetchMyEvent = async (userid: string) => {
   const response = await axios.post(`${api}/event/myevents`, { userid });
@@ -83,7 +97,9 @@ const fetchEventById = async (eventId: string) => {
 };
 
 const fetchParticipantsByEventId = async (eventId: string) => {
-  const response = await axios.get(`${api}/event/${eventId}/participants`,{headers:{'Cache-Control': 'no-cache'}});
+  const response = await axios.get(`${api}/event/${eventId}/participants`, {
+    headers: { "Cache-Control": "no-cache" },
+  });
   return response.data;
 };
 
@@ -98,11 +114,11 @@ export const useCreateEvent = () => {
   });
 };
 
-export const useForgetPassword = ()=>{
+export const useForgetPassword = () => {
   return useMutation({
-    mutationFn :forgetpassword,
-  })
-}
+    mutationFn: forgetpassword,
+  });
+};
 
 export const useCreateVolunteer = () => {
   return useMutation({
@@ -121,11 +137,11 @@ export const useDeleteParticipant = () => {
   });
 };
 
-export const useSendQuestion = ()=>{
+export const useSendQuestion = () => {
   return useMutation({
     mutationFn: SendPassWord,
-  })
-}
+  });
+};
 
 export const useEditOrganizer = () => {
   return useMutation({
@@ -138,8 +154,6 @@ export const useGetAiMessage = () => {
     mutationFn: GetAiMessage,
   });
 };
-
-
 
 export const useGetOrganizerDetails = (userID: string) => {
   return useQuery({
@@ -154,12 +168,12 @@ export const useGetallEvents = () =>
     queryFn: FetchEvent,
   });
 
-  export const useGetAnalytics = (userID:string)=>{
-    return useQuery({
-      queryKey:["analytics"],
-      queryFn:()=> FetchAnalytics(userID),
-    })
-  }
+export const useGetAnalytics = (userID: string) => {
+  return useQuery({
+    queryKey: ["analytics"],
+    queryFn: () => FetchAnalytics(userID),
+  });
+};
 
 export const useFetchMyEvent = (userid: string) =>
   useQuery({
