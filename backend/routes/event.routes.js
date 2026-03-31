@@ -6,17 +6,17 @@ const { v2: cloudinary } = require("cloudinary");
 const multer = require("multer");
 
 cloudinary.config({
-  cloud_name: 'ddtqri4py',
-  api_key: '457897286296644',
-  api_secret: process.env.API_SECRET || "2XBKMMahnRC5q2m5j6qLWpz0fGc"
+  cloud_name: "ddtqri4py",
+  api_key: "457897286296644",
+  api_secret: process.env.API_SECRET || "2XBKMMahnRC5q2m5j6qLWpz0fGc",
 });
 
 const storage = multer.memoryStorage();
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 
-  }
+    fileSize: 5 * 1024 * 1024,
+  },
 });
 router.get("/all", async function (req, res) {
   try {
@@ -27,8 +27,7 @@ router.get("/all", async function (req, res) {
     res.status(500).json({ message: "Error fetching events", error: err });
   }
 });
-router.post("/create_event", upload.single('image'), async function (req, res) {
-  
+router.post("/create_event", upload.single("image"), async function (req, res) {
   try {
     const {
       title,
@@ -41,7 +40,6 @@ router.post("/create_event", upload.single('image'), async function (req, res) {
       ticketsAvailable,
       createdBy,
     } = req.body;
-   
 
     if (
       !title ||
@@ -56,11 +54,11 @@ router.post("/create_event", upload.single('image'), async function (req, res) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-    
+    const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+
     const uploadResult = await cloudinary.uploader.upload(fileStr, {
-      folder: 'events',
-      resource_type: 'image'
+      folder: "events",
+      resource_type: "image",
     });
 
     const newEvent = await Event.create({
@@ -70,7 +68,7 @@ router.post("/create_event", upload.single('image'), async function (req, res) {
       startTime,
       endTime,
       createdBy,
-      image: uploadResult.secure_url, 
+      image: uploadResult.secure_url,
       ticketCategory,
       ticketPrice: ticketCategory === "paid" ? ticketPrice : undefined,
       ticketsAvailable,
@@ -86,7 +84,6 @@ router.post("/create_event", upload.single('image'), async function (req, res) {
   }
 });
 
-
 router.get("/create_event", function (req, res) {
   res.send("all events");
 });
@@ -100,6 +97,7 @@ router.get("/:eventID", async function (req, res) {
     }
     res.json(event);
   } catch (error) {
+    console.error("Error fetching event:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -129,9 +127,9 @@ router.post("/myevents", async (req, res) => {
     console.error("Error fetching events:", error);
     res.status(500).json({ error: "Server error", details: error.message });
   }
-}); 
+});
 
-router.post("/edit/:eventId", upload.single('image'), async (req, res) => {
+router.post("/edit/:eventId", upload.single("image"), async (req, res) => {
   const eventId = req.params.eventId;
   try {
     console.log(`Received request to edit event: ${eventId}`);
@@ -181,14 +179,14 @@ router.post("/edit/:eventId", upload.single('image'), async (req, res) => {
     // If a new image is uploaded, update it
     if (req.file) {
       // Convert the buffer to a data URI for Cloudinary
-      const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-      
+      const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+
       // Upload the image to Cloudinary
       const uploadResult = await cloudinary.uploader.upload(fileStr, {
-        folder: 'events',
-        resource_type: 'image'
+        folder: "events",
+        resource_type: "image",
       });
-      
+
       existingEvent.image = uploadResult.secure_url;
     }
 
@@ -228,7 +226,8 @@ router.post("/sendquestion", async (req, res) => {
 
     // Find the event by event ID
     let event = await Event.findById(eventid);
-    if (!event) return res.status(404).json({ message: "Event does not exist" });
+    if (!event)
+      return res.status(404).json({ message: "Event does not exist" });
 
     let updatedEvent;
 
@@ -237,7 +236,7 @@ router.post("/sendquestion", async (req, res) => {
       updatedEvent = await Event.findOneAndUpdate(
         { _id: eventid, "questions._id": id }, // Find event with the specific question
         { $set: { "questions.$.answer": ans } }, // Update the answer field
-        { new: true } // Return the updated document
+        { new: true }, // Return the updated document
       );
 
       if (!updatedEvent) {
@@ -249,13 +248,16 @@ router.post("/sendquestion", async (req, res) => {
       updatedEvent = await event.save();
     }
 
-    res.status(200).json({ message: "Question added/updated successfully", event: updatedEvent });
+    res
+      .status(200)
+      .json({
+        message: "Question added/updated successfully",
+        event: updatedEvent,
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error });
   }
 });
-
-
 
 module.exports = router;

@@ -12,7 +12,7 @@ const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
-
+console.log("Key id", process.env.RAZORPAY_KEY_ID);
 // Helper function to generate signature for payment verification
 const generateSignature = (orderId, paymentId) => {
   const body = orderId + "|" + paymentId;
@@ -37,7 +37,7 @@ router.post("/create-order", async (req, res) => {
     }
 
     const ticketNumber = `TICKET-${Date.now()}-${Math.floor(
-      Math.random() * 10000
+      Math.random() * 10000,
     )}`;
 
     const options = {
@@ -99,7 +99,7 @@ router.post("/verify-payment", async (req, res) => {
 
     const generated_signature = generateSignature(
       razorpay_order_id,
-      razorpay_payment_id
+      razorpay_payment_id,
     );
 
     if (razorpay_signature === generated_signature) {

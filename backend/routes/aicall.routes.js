@@ -4,8 +4,8 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { createCanvas, loadImage } = require("canvas");
 
 // Initialize Gemini AI with API key from environment
-const genAI = new GoogleGenerativeAI(process.env.genAI);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
 // POST /ai/generate-prompt
 router.post("/generate-prompt", async (req, res) => {
@@ -21,16 +21,21 @@ router.post("/generate-prompt", async (req, res) => {
     // Define prompt based on type
     switch (type.toLowerCase()) {
       case "story":
-        systemPrompt = "Generate a creative writing prompt for a short story. The prompt should include a unique setting, a main character, and a central conflict. Format the response as a single sentence.";
+        systemPrompt =
+          "Generate a creative writing prompt for a short story. The prompt should include a unique setting, a main character, and a central conflict. Format the response as a single sentence.";
         break;
       case "art":
-        systemPrompt = "Create an art prompt for a digital illustration, describing a vivid scene with specific colors, mood, and key elements to include. Format the response as a single sentence.";
+        systemPrompt =
+          "Create an art prompt for a digital illustration, describing a vivid scene with specific colors, mood, and key elements to include. Format the response as a single sentence.";
         break;
       case "coding":
-        systemPrompt = "Generate a coding challenge prompt that includes a specific programming task, constraints, and an example use case. Format the response as a single sentence.";
+        systemPrompt =
+          "Generate a coding challenge prompt that includes a specific programming task, constraints, and an example use case. Format the response as a single sentence.";
         break;
       default:
-        return res.status(400).json({ error: "Invalid prompt type. Use 'story', 'art', or 'coding'." });
+        return res.status(400).json({
+          error: "Invalid prompt type. Use 'story', 'art', or 'coding'.",
+        });
     }
 
     // Call Gemini API
@@ -48,11 +53,15 @@ router.post("/generate-prompt", async (req, res) => {
 // POST /ai/generate-event-content
 router.post("/generate-event-content", async (req, res) => {
   try {
-    const { eventName, date, time, location, description } = req.body.eventDetails;
+    const { eventName, date, time, location, description } =
+      req.body.eventDetails;
 
     // Validate required fields
     if (!eventName || !date || !time || !location || !description) {
-      return res.status(400).json({ error: "Missing required fields: eventName, date, time, location, description" });
+      return res.status(400).json({
+        error:
+          "Missing required fields: eventName, date, time, location, description",
+      });
     }
 
     // Construct prompt for Gemini API (for email and message only)
@@ -90,9 +99,9 @@ router.post("/generate-event-content", async (req, res) => {
 
     // Clean the response: remove code fences and extra whitespace
     let cleanedText = rawText
-      .replace(/```json\n?|\n?```|```/g, '') // Remove ```json and ```
-      .replace(/^\s*|\s*$/g, '') // Trim whitespace
-      .replace(/^.*?\n?\{/, '{'); // Remove any text before the JSON object
+      .replace(/```json\n?|\n?```|```/g, "") // Remove ```json and ```
+      .replace(/^\s*|\s*$/g, "") // Trim whitespace
+      .replace(/^.*?\n?\{/, "{"); // Remove any text before the JSON object
 
     // Parse the cleaned response as JSON
     let content;
@@ -186,7 +195,7 @@ router.post("/generate-event-content", async (req, res) => {
     res.status(200).json({
       flyer: flyerBase64,
       email: content.email,
-      message: content.message
+      message: content.message,
     });
   } catch (error) {
     console.error("Error generating event content:", error);
