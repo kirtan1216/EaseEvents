@@ -46,7 +46,7 @@ ParticipantSchema.pre("save", async function (next) {
   if (this.isModified("paymentStatus") && this.paymentStatus === "paid") {
     if (!this.ticketNumber) {
       this.ticketNumber = `TICKET-${Date.now()}-${Math.floor(
-        Math.random() * 10000
+        Math.random() * 10000,
       )}`;
     }
     if (!this.qrCode) {
@@ -63,8 +63,10 @@ ParticipantSchema.pre("save", async function (next) {
       event.date,
       event.venue,
       event.startTime,
-      event.endTime
+      event.endTime,
     );
+
+    console.log(`Ticket email sent to ${this.email} for event ${event.title}`);
   }
   next();
 });

@@ -2,8 +2,8 @@ const express = require("express");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Event = require("../models/event.model");
-
 const Participant = require("../models/participant.model");
+const sendTicketEmail = require("../config/emailService");
 require("dotenv").config();
 
 const router = express.Router();
@@ -110,6 +110,26 @@ router.post("/verify-payment", async (req, res) => {
         if (event.ticketsAvailable > 0) {
           event.ticketsAvailable -= 1;
           await event.save();
+        }
+
+        // Send ticket confirmation email
+        console.log("[Payment] Payment verified. Sending ticket email to:", participant.email);
+        try {
+          await sendTicketEmail(
+            participant.email,
+            participant.name,
+            event.title,
+            participant.ticketNumber,
+            null, // qrCodePath not used currently
+            event.date,
+            event.venue,
+            event.startTime,
+            event.endTime,
+          );
+          console.log("[Payment] Ticket email sent successfully to:", participant.email);
+        } catch (emailError) {
+          console.error("[Payment] Failed to send ticket email:", emailError.message);
+          // Don't fail the payment response just because email failed
         }
       }
 

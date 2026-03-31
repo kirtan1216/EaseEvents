@@ -1,6 +1,22 @@
 const nodemailer = require("nodemailer");
 
 const SendPassword = async (name, email, password, eventTitle) => {
+  console.log(
+    "[SendPassword] Starting SendPassword function for:",
+    name,
+    "(",
+    email,
+    ")",
+  );
+  console.log(
+    "[SendPassword] EMAIL_USER env variable:",
+    process.env.EMAIL_USER ? "✓ Set" : "✗ NOT SET",
+  );
+  console.log(
+    "[SendPassword] EMAIL_PASS env variable:",
+    process.env.EMAIL_PASS ? "✓ Set" : "✗ NOT SET",
+  );
+
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -8,6 +24,8 @@ const SendPassword = async (name, email, password, eventTitle) => {
       pass: process.env.EMAIL_PASS,
     },
   });
+
+  console.log("[SendPassword] Transporter created");
 
   let mailOptions = {
     from: process.env.EMAIL_USER,
@@ -95,7 +113,7 @@ const SendPassword = async (name, email, password, eventTitle) => {
         <div class="login-details">
           <p>Username :<strong> ${name}</strong></p>
           <p>Password :<strong> ${password}</strong></p>
-          <p><a href="https://easeevents-cb281.web.app/VolLogin" target="_blank">Click here to log in to Our Website</a></p>
+          <p><a href="https://ease-events-926c7.web.app/VolLogin" target="_blank">Click here to log in to Our Website</a></p>
         </div>
 
         <p>Your contribution is highly valued, and we appreciate your support in making this event a success!</p>
@@ -110,12 +128,16 @@ const SendPassword = async (name, email, password, eventTitle) => {
   };
 
   // Send email
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log("Error sending email:", error);
-    } else {
-      console.log("Email sent:", info.response);
-    }
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending volunteer password email:", error);
+        reject(error);
+      } else {
+        console.log("Volunteer password email sent:", info.response);
+        resolve(info);
+      }
+    });
   });
 };
 

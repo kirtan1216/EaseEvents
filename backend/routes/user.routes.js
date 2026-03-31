@@ -68,20 +68,29 @@ router.get("/verify", async function (req, res) {
 router.post("/forgetpassword", async function (req, res) {
   try {
     const { email } = req.body;
+    console.log("[ForgetPassword Route] Request received for email:", email);
     if (!email) return res.status(400).json({ message: "Email is required." });
 
     const user = await userSchema.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found." });
 
-    const resetToken = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: "1h" });
+    const resetToken = jwt.sign({ id: user._id }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
 
-    const resetLink = `https://easeevents-cb281.web.app/resetpassword?token=${resetToken}`;
+    const resetLink = `https://ease-events-926c7.web.app/resetpassword?token=${resetToken}`;
     try {
-      await forgetpassword(email, resetLink); // Ensure this function handles errors
-      return res.status(200).json({ message: "Reset link sent! Check your email." });
+      console.log("[ForgetPassword Route] Calling forgetpassword function...");
+      await forgetpassword(email, resetLink);
+      console.log("[ForgetPassword Route] Email sent successfully");
+      return res
+        .status(200)
+        .json({ message: "Reset link sent! Check your email." });
     } catch (error) {
-      console.error("Error sending reset email:", error);
-      return res.status(500).json({ message: "Failed to send reset email." });
+      console.error("[ForgetPassword Route] Error sending reset email:", error);
+      return res
+        .status(500)
+        .json({ message: "Failed to send reset email.", error: error.message });
     }
   } catch (error) {
     console.error("Forget Password Error:", error);
@@ -93,12 +102,14 @@ router.post("/resetpassword", async function (req, res) {
   const { token, newPassword } = req.body;
 
   if (!token || !newPassword) {
-    return res.status(400).json({ message: "Token and new password are required" });
+    return res
+      .status(400)
+      .json({ message: "Token and new password are required" });
   }
 
   // Verify token
   jwt.verify(token, SECRET_KEY, async (err, decoded) => {
-    if (err && err.name === 'TokenExpiredError') {
+    if (err && err.name === "TokenExpiredError") {
       return res.status(400).json({ message: "Token has expired" });
     }
 
@@ -144,7 +155,7 @@ router.post("/login", async function (req, res) {
         username: user.username,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     res.cookie("token", token, {
@@ -193,7 +204,7 @@ router.post("/Vollogin", async function (req, res) {
         username: volunte.name,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "2h" }
+      { expiresIn: "2h" },
     );
 
     res.cookie("token", token, {
