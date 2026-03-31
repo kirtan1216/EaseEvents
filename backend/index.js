@@ -20,9 +20,9 @@ ConnectTODB();
 app.set("view engine", "ejs");
 app.use(
   cors({
-    origin: ["https://easeevents-cb281.web.app", "http://localhost:5173"],
+    origin: ["https://ease-events-926c7.web.app", "http://localhost:5173"],
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.static("public"));
@@ -36,7 +36,7 @@ app.use("/payment", paymnetroutes);
 app.use("/event", eventroutes);
 app.use("/participant", participanteroutes);
 app.use("/volunteer", volunteerroutes);
-app.use("/anal",analyticsroutes );
+app.use("/anal", analyticsroutes);
 app.use("/ai", aicall);
 
 const PORT = process.env.PORT;
